@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>Go server</title>
+    <style>
+        body {
+            width: 100%;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app {
+            width: 1020px;
+            max-width: 1020px;
+            display: grid;
+            grid-template-columns: 80% 20%;
+            grid-gap: 10px 10px;
+        }
+
+        .status, #comment-list {
+            grid-column: 1/3;
+        }
+
+        .status {
+            text-align: center;
+            font-weight: 700;
+        }
+
+        #input, #btn-comment {
+            border-radius: 6px;
+        }
+
+        #input {
+            box-sizing: border-box;
+            padding: 10px;
+            outline: none;
+        }
+
+        #btn-comment {
+            font-weight: 700;
+            border: 0;
+        }
+
+        .status-connect {
+            color: green;
+        }
+
+        .status-disconnect {
+            color: red;
+        }
+
+        #comment-list {
+            margin: 0;
+            padding: 0;
+        }
+
+        .comment-item {
+            box-sizing: border-box;
+            list-style-type: none;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <main class="app">
+        <span class="status">Status: <span id="connection-status"></span> </span>
+        <input id="input" type="text" disabled>
+        <button id="btn-comment" disabled>Комментировать</button>
+        <ul id="comment-list"></ul>
+    </main>
+    <script>
+        const status = document.getElementById('connection-status')
+        const input = document.getElementById('input')
+        const btnAddComment = document.getElementById('btn-comment')
+        const commentList = document.getElementById('comment-list')
+
+        const socket = new WebSocket('ws://localhost:8080')
+
+        btnAddComment.addEventListener('click', () => {
+            socket.send(input.value)
+        })
+
+        socket.onopen = function () {
+            status.classList.remove('status-disconnect')
+            status.classList.add('status-connect')
+            status.innerHTML = 'connect'
+            input.disabled = false
+            btnAddComment.disabled = false
+        }
+
+        socket.onmessage = function (e) {
+            commentList.appendChild(createComment(e.data))
+        }
+
+        socket.onclose = function () {
+            status.classList.remove('status-connect')
+            status.classList.add('status-disconnect')
+            status.innerHTML = 'disconnect'
+            input.disabled = true
+            btnAddComment.disabled = true
+        }
+
+        function createComment (text) {
+            const comment = document.createElement('li')
+            comment.classList.add('comment-item')
+            comment.innerHTML = text
+            return comment
+        }
+
+    </script>
+</body>
+</html>
