@@ -79,7 +79,11 @@
         <span class="status">Status: <span id="connection-status"></span> </span>
         <input id="input" type="text" disabled>
         <button id="btn-comment" disabled>Комментировать</button>
-        <ul id="comment-list"></ul>
+        <ul id="comment-list">
+            {{range .Comment}}
+                <li class="comment-item">{{.Text}}</li>
+            {{end}}
+        </ul>
     </main>
     <script>
         const status = document.getElementById('connection-status')
@@ -104,7 +108,10 @@
         }
 
         socket.onmessage = function (e) {
-            commentList.appendChild(createComment(e.data))
+            const el = document.createElement('li')
+            el.classList.add('comment-item')
+            el.innerHTML = e.data
+            commentList.appendChild(el)
         }
 
         socket.onclose = function () {
@@ -114,14 +121,6 @@
             input.disabled = true
             btnAddComment.disabled = true
         }
-
-        function createComment (text) {
-            const comment = document.createElement('li')
-            comment.classList.add('comment-item')
-            comment.innerHTML = text
-            return comment
-        }
-
     </script>
 </body>
 </html>
