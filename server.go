@@ -26,12 +26,10 @@ func swHandler (w http.ResponseWriter, r *http.Request) {
 	connection, _ := upgrader.Upgrade(w, r, nil)
 	defer connection.Close()
 	clients[connection] = true
-
+	defer delete(clients, connection)
 	for {
-		_, message, err := connection.ReadMessage()
-
-		if err != nil {
-			log.Fatal(err)
+		mt, message, err := connection.ReadMessage()
+		if err != nil || mt == websocket.CloseMessage {
 			break
 		}
 
